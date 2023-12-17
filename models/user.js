@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    totalWithdrawals: {
+    totalExpenditures: {
         type: Number,
         default: 0,
     }
