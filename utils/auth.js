@@ -1,21 +1,22 @@
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const User = require("../models/user");
 
-export const comparePasswords = async (password, hash) => {
+const comparePasswords = async (password, hash) => {
     return await bcrypt.compare(password, hash);
 };
-export const hasPassword = async (password) => {
+const hasPassword = async (password) => {
     return await bcrypt.hash(password, 5);
 };
 
-export const createJWT = async (user) => {
+const createJWT = async (user) => {
     const token = await jwt.sign(
         {id: user.id, name: user.name},
         process.env.JWT_SECRET
     );
     return token;
 };
-export const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
     const bearer = req.headers.authorization;
     if (!bearer) {
         res.status(401);
@@ -30,7 +31,14 @@ export const protect = (req, res, next) => {
     }
     try {
         const user = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = user;
+        const mongoUser = await User.findById(user.id);
+        req.user = {
+            id: mongoUser.id,
+            name: mongoUser.name,
+            email: mongoUser.email,
+            totalSavings: mongoUser.totalSavings,
+            totalExpenditures: mongoUser.totalExpenditures
+        };
         next();
     } catch (e) {
         console.log(e);
@@ -38,4 +46,10 @@ export const protect = (req, res, next) => {
         res.json({message: "The token cannot be identified "});
         return;
     }
+};
+module.exports = {
+    comparePasswords,
+    hasPassword,
+    createJWT,
+    protect
 };

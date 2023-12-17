@@ -11,7 +11,7 @@ const expenditureSchema = new mongoose.Schema({
         default: Date.now(),
     },
     user: {
-        type: monoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
     description: {
@@ -21,4 +21,4 @@ const expenditureSchema = new mongoose.Schema({
 })
 
 
-module.exports = monoose.model('Expenditure', expenditureSchema);
+module.exports = mongoose.model('Expenditure', expenditureSchema);

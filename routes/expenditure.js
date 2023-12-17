@@ -2,6 +2,7 @@ const express = require('express');
 const {protect} = require("../utils/auth");
 const router = express.Router();
 const Expenditure = require("../models/expenditure");
+const User = require("../models/user");
 
 
 router.get('/', protect, async function (req, res, next) {
@@ -28,19 +29,22 @@ router.post('/', protect, async function (req, res, next) {
             const {
                 amount, description, date
             } = data;
+
             if (!amount || !description || !date) {
                 res.status(400).json({
                     message: "invalid input"
                 });
                 return;
             }
+            const dateObject = new Date(date);
             const expenditure = new Expenditure({
-                amount, description, date, user: req.user.id
+                amount, description, dateObject, user: req.user.id
             });
             await expenditure.save();
-            const user = req.user;
+            const user = await User.findById(req.user.id);
             user.totalSavings -= amount;
             user.totalExpenditures += amount;
+            await user.save();
             res.json({
                 message: "expenditure created", expenditure
             });
@@ -69,13 +73,18 @@ router.post('/bulk', protect, async function (req, res, next) {
             const expenditure = await Expenditure.insertMany(expenditures.map((expenditure) => {
                 return {
                     ...expenditure,
+                    date: new Date(expenditure.date),
                     user: req.user.id
                 }
             }));
-            const user = req.user;
-            user.totalSavings -= expenditure.reduce((acc, curr) => acc + curr.amount, 0);
-            user.totalExpenditures += expenditure.reduce((acc, curr) => acc + curr.amount, 0);
+            const totalAmount = expenditures.reduce((acc, expenditure) => {
+                return acc + expenditure.amount;
+            }, 0);
+            const user = await User.findById(req.user.id);
+            user.totalSavings -= totalAmount;
+            user.totalExpenditures += totalAmount;
             await user.save();
+
             res.json({
                 message: "expenditures created", expenditure
             });
@@ -88,5 +97,6 @@ router.post('/bulk', protect, async function (req, res, next) {
     }
 );
 
+module.exports = router;
 
 

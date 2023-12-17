@@ -5,19 +5,19 @@ const User = require("../models/user");
 
 /* GET users listing. */
 router.post('/create-account', async function (req, res, next) {
-    const data = req.body;
     const {
         name,
         password,
         email
-    } = data;
+    } = req.body;
+
     if (!name || !password || !email) {
         res.status(400).json({
             message: "invalid input"
         });
         return;
     }
-    const hashedPassword = hasPassword(password);
+    const hashedPassword = await hasPassword(password);
     const user = new User({
         name,
         password: hashedPassword,
@@ -68,6 +68,44 @@ router.post('/login', async function (req, res, next) {
         });
     }
 );
+
+router.put('/me', protect, async function (req, res, next) {
+    try {
+        const data = req.body;
+        const {
+            name,
+            password,
+            email
+        } = data;
+        if (!name || !password || !email) {
+            res.status(400).json({
+                message: "invalid input"
+            });
+            return;
+        }
+        const hashedPassword = await hasPassword(password);
+        const user = await User.findByIdAndUpdate(req.user.id, {
+            name,
+            password: hashedPassword,
+            email
+        }, {new: true});
+        res.json({
+            message: "user updated",
+            user: {
+                name: user.name,
+                email: user.email,
+                totalSavings: user.totalSavings,
+                totalExpenditures: user.totalExpenditures
+            }
+        });
+    } catch (e) {
+        console.log(e)
+        res.status(500).json({
+            message: "something went wrong"
+        })
+    }
+
+});
 
 
 // get me

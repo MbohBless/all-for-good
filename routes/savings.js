@@ -1,7 +1,8 @@
 const express = require('express');
 const {protect} = require("../utils/auth");
 const router = express.Router();
-import Savings from "../models/savings";
+const Savings = require("../models/savings");
+const User = require("../models/user");
 
 
 router.get('/', protect, async function (req, res, next) {
@@ -33,10 +34,15 @@ router.post('/', protect, async function (req, res, next) {
             });
             return;
         }
+        const dateObject = new Date(date);
         const saving = new Savings({
-            amount, description, date, user: req.user.id
+            amount, description, dateObject, user: req.user.id
         });
         await saving.save();
+        const user = await User.findById(req.user.id);
+        user.totalSavings += amount;
+        await user.save();
+
         res.json({
             message: "saving created", saving
         });
@@ -75,14 +81,14 @@ router.post('/bulk', protect, async function (req, res, next) {
 
         const savingsToSave = savings.map((saving) => {
             return {
-                amount: saving.amount, description: saving.description, date: saving.date, user: req.user.id
+                amount: saving.amount, description: saving.description, date: new Date(saving.date), user: req.user.id
             }
         })
         await Savings.insertMany(savingsToSave);
         const total = savingsToSave.reduce((acc, curr) => {
             return acc + curr.amount;
         }, 0);
-        const user = req.user
+        const user = await User.findById(req.user.id);
         user.totalExpenditures += total;
         await user.save();
         res.json({
