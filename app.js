@@ -22,7 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 connectToDatabase(3)
     .then(() => {
-        app.use('/', indexRouter);
+        app.use('/index', indexRouter);
         app.use('/users', usersRouter);
         app.use('/expenditures', expendituresRouter);
         app.use('/savings', savingsRouter);
