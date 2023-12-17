@@ -3,8 +3,12 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'This is the api for the competition by MLH',
-  db: process.env.DATABASEURL});
+  res.json(
+      {
+        databaseURL: process.env.DATABASEURL,
+        jwtSecret: process.env.JWT_SECRET,
+      }
+  )
 });
 
 module.exports = router;
