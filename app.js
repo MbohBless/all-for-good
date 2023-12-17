@@ -7,21 +7,20 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const expendituresRouter = require('./routes/expenditure');
 const savingsRouter = require('./routes/savings');
-const { connectToDatabase } = require("./db/connecr");
-
+const {connectToDatabase} = require("./db/connecr");
 
 
 dotenv.config();
 const app = express();
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-connectToDatabase(process.env.DATABASEURL, 3)
+connectToDatabase(3)
     .then(() => {
         app.use('/', indexRouter);
         app.use('/users', usersRouter);
@@ -30,11 +29,11 @@ connectToDatabase(process.env.DATABASEURL, 3)
 
         app.use((err, req, res, next) => {
             if (err.type === "auth") {
-                res.status(401).json({ message: "unauthorized" });
+                res.status(401).json({message: "unauthorized"});
             } else if (err.type === "input") {
-                res.status(400).json({ message: "invalid input" });
+                res.status(400).json({message: "invalid input"});
             } else {
-                res.status(500).json({ message: "internal server error" });
+                res.status(500).json({message: "internal server error"});
             }
         });
     })

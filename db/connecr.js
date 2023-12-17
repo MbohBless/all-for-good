@@ -4,15 +4,14 @@ const mongoose = require("mongoose");
 let dbConnection;
 
 const connectToDatabase = async (
-    databaseUrl,
-    trialsLeft
+   trialsLeft =2
 ) => {
     if (trialsLeft === 0 || trialsLeft < 0) {
         console.info("Database connection failed");
         return;
     }
     try {
-        const data = await mongoose.connect(databaseUrl);
+        const data = await mongoose.connect(process.env.DATABASEURL);
         dbConnection = data.connection;
         console.info("[SERVER] Database connected");
     } catch (error) {
