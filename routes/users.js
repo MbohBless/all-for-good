@@ -5,31 +5,40 @@ const User = require("../models/user");
 
 /* GET users listing. */
 router.post('/create-account', async function (req, res, next) {
-    const {
-        name,
-        password,
-        email
-    } = req.body;
+    try{
+        const {
+            name,
+            password,
+            email
+        } = req.body;
 
-    if (!name || !password || !email) {
-        res.status(400).json({
-            message: "invalid input"
+        if (!name || !password || !email) {
+            res.status(400).json({
+                message: "invalid input"
+            });
+            return;
+        }
+        const hashedPassword = await hasPassword(password);
+        const user = new User({
+            name,
+            password: hashedPassword,
+            email
         });
-        return;
-    }
-    const hashedPassword = await hasPassword(password);
-    const user = new User({
-        name,
-        password: hashedPassword,
-        email
-    });
-    await user.save();
-    const jwt = await createJWT(user);
+        await user.save();
+        const jwt = await createJWT(user);
 
-    res.json({
-        message: "user created",
-        token: jwt
-    });
+        res.json({
+            message: "user created",
+            token: jwt
+        });
+    }
+    catch (e) {
+        console.log(e)
+        res.status(500).json({
+            error: e,
+            message: "something went wrong"
+        })
+    }
 
 });
 
