@@ -11,7 +11,7 @@ const hasPassword = async (password) => {
 
 const createJWT = async (user) => {
     const token = await jwt.sign(
-        {id: user.id, name: user.name},
+        {id: user._id, name: user.name},
         process.env.JWT_SECRET
     );
     return token;
@@ -33,7 +33,7 @@ const protect = async (req, res, next) => {
         const user = jwt.verify(token, process.env.JWT_SECRET);
         const mongoUser = await User.findById(user.id);
         req.user = {
-            id: mongoUser.id,
+            id: mongoUser._id,
             name: mongoUser.name,
             email: mongoUser.email,
             totalSavings: mongoUser.totalSavings,
