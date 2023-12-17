@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
 
-
 let dbConnection;
 
 const connectToDatabase = async (
-   trialsLeft =2
+    trialsLeft = 2
 ) => {
     if (trialsLeft === 0 || trialsLeft < 0) {
         console.info("Database connection failed");

@@ -9,18 +9,12 @@ const expendituresRouter = require('./routes/expenditure');
 const savingsRouter = require('./routes/savings');
 const {connectToDatabase} = require("./db/connecr");
 
-const intercept = (req, res, next) => {
-    console.log(req.url);
-    console.log(process.env.DATABASEURL);
-
-    next();
-}
 dotenv.config();
 const app = express();
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
-app.use(intercept)
+
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -46,5 +40,11 @@ connectToDatabase(3)
         console.error(e);
         process.exit(1);
     });
+app.use((req, res, next) => {
+        res.status(404).json({message: "not found"});
+    }
+);
 
-module.exports = app;
+app.listen(process.env.PORT || 3000, () => {
+    console.log("Server started");
+});
