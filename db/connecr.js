@@ -18,7 +18,7 @@ const connectToDatabase = async (
         console.error(error);
         console.info(`[SERVER] Database connection failed. Trials left: ${trialsLeft}`);
         setTimeout(() => {
-            connectToDatabase(trls - 1);
+            connectToDatabase(trialsLeft - 1);
         }, 2000);
     }
 };
