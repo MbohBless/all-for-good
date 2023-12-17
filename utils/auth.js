@@ -32,6 +32,11 @@ const protect = async (req, res, next) => {
     try {
         const user = jwt.verify(token, process.env.JWT_SECRET);
         const mongoUser = await User.findById(user.id);
+        if (!mongoUser) {
+            res.status(401);
+            res.json({message: "not valid token "});
+            return;
+        }
         req.user = {
             id: mongoUser._id,
             name: mongoUser.name,
